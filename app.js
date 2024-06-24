@@ -46,26 +46,30 @@ const componentPrices = {
       { date: '2023-06-01', price: 200 },
       { date: '2023-06-15', price: 205 },
       { date: '2023-07-01', price: 198 },
-      { date: '2023-07-15', p    { date: '2023-08-01', price: 199 },
+      { date: '2023-07-15', price: 197 },    
+      { date: '2023-08-01', price: 199 },
       { date: '2023-08-15', price: 203 }
     ],
     'PSU006': [
       { date: '2023-06-01', price: 90 },
       { date: '2023-06-15', price: 95 },
-      { date: '2023-07-01', price: 9    { date: '2023-07-15', price: 94 },
+      { date: '2023-07-01', price: 94 },    
+      { date: '2023-07-15', price: 94 },
       { date: '2023-08-01', price: 91 },
       { date: '2023-08-15', price: 93 }
     ],
     'CASE007': [
       { date: '2023-06-01', price: 70 },
-      { date: '2023-06-15', price    { date: '2023-07-01', price: 72 },
+      { date: '2023-07-15', price: 74 },
+      { date: '2023-07-15', price: 74 },
       { date: '2023-07-15', price: 74 },
       { date: '2023-08-01', price: 71 },
       { date: '2023-08-15', price: 73 }
     ],
     'COOL008': [
       { date: '2023-06-01', price: 50 },
-      { dat    { date: '2023-07-01', price: 52 },
+      { date: '2023 06-15', price: 56 },  
+      { date: '2023-07-01', price: 52 },
       { date: '2023-07-15', price: 54 },
       { date: '2023-08-01', price: 51 },
       { date: '2023-08-15', price: 53 }
@@ -77,7 +81,8 @@ const componentPrices = {
       { date: '2023-07-15', price: 31 },
       { date: '2023-08-01', price: 28 },
       { date: '2023-08-15', price: 30 }
-    ]
+    ],
+
   };
 
 // Serve the index.html file
