@@ -5,57 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Component Price Tracker</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-8">
     <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
         <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">Component Price Tracker</h1>
-        <div class="flex mb-4">
-            <input type="text" id="componentId" placeholder="Enter Component ID" class="flex-grow px-4 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <button onclick="fetchPrices()" class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 transition duration-300">Fetch Prices</button>
+        <div class="flex mb-4 flex-wrap">
+            <select id="componentSelect" multiple class="flex-grow px-4 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <!-- Options will be populated dynamically -->
+            </select>
+            <button onclick="fetchPrices()" class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 transition duration-300">Compare Prices</button>
         </div>
         
-        <div class="mt-4 mb-8">
-            <h2 class="text-xl font-semibold mb-2 text-gray-700">Queryable Components:</h2>
-            <ul id="componentList" class="list-disc pl-5 text-gray-600"></ul>
-        </div>
-
         <div class="mt-8">
             <canvas id="priceChart"></canvas>
         </div>
     </div>
 
     <script>
-        // Fetch and display the list of queryable components
+        let chart = null;
+
+        // Fetch and populate the list of queryable components
         async function fetchComponents() {
             const response = await fetch('/api/components');
             const components = await response.json();
-            const componentList = document.getElementById('componentList');
-            componentList.innerHTML = components.map(component => `<li>${component}</li>`).join('');
+            const componentSelect = document.getElementById('componentSelect');
+            componentSelect.innerHTML = components.map(component => `<option value="${component}">${component}</option>`).join('');
         }
 
         async function fetchPrices() {
-            const componentId = document.getElementById('componentId').value;
-            const response = await fetch(`/api/prices/${componentId}`);
+            const selectedComponents = Array.from(document.getElementById('componentSelect').selectedOptions).map(option => option.value);
+            
+            if (selectedComponents.length === 0) {
+                alert('Please select at least one component');
+                return;
+            }
+
+            const response = await fetch(`/api/prices?components=${selectedComponents.join(',')}`);
             const data = await response.json();
 
-            const dates = data.map(item => item.date);
-            const prices = data.map(item => item.price);
+            const datasets = Object.entries(data).map(([componentId, prices]) => ({
+                label: componentId,
+                data: prices.map(item => ({ x: new Date(item.date), y: item.price })),
+                borderColor: getRandomColor(),
+                backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                tension: 0.1,
+                fill: false
+            }));
 
             const ctx = document.getElementById('priceChart').getContext('2d');
-            new Chart(ctx, {
+            
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: dates,
-                    datasets: [{
-                        label: `Prices for ${componentId}`,
-                        data: prices,
-                        borderColor: 'rgb(59, 130, 246)',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        tension: 0.1,
-                        fill: true
-                    }]
-                },
+                data: { datasets },
                 options: {
                     responsive: true,
                     scales: {
@@ -67,19 +74,22 @@
                             }
                         },
                         x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day'
+                            },
                             title: {
                                 display: true,
                                 text: 'Date'
                             }
                         }
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
                     }
                 }
             });
+        }
+
+        function getRandomColor() {
+            return `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`;
         }
 
         // Call fetchComponents when the page loads

@@ -32,11 +32,12 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// New endpoint to get the list of queryable components
+// Endpoint to get the list of queryable components
 app.get('/api/components', (req, res) => {
   res.json(Object.keys(componentPrices));
 });
 
+// Endpoint to get prices for a single component
 app.get('/api/prices/:componentId', (req, res) => {
   const { componentId } = req.params;
   const prices = componentPrices[componentId];
@@ -46,6 +47,20 @@ app.get('/api/prices/:componentId', (req, res) => {
   } else {
     res.status(404).json({ error: 'Component not found' });
   }
+});
+
+// New endpoint to fetch prices for multiple components
+app.get('/api/prices', (req, res) => {
+  const componentIds = req.query.components.split(',');
+  const result = {};
+
+  for (const componentId of componentIds) {
+    if (componentPrices[componentId]) {
+      result[componentId] = componentPrices[componentId];
+    }
+  }
+
+  res.json(result);
 });
 
 app.listen(port, () => {
